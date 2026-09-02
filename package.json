@@ -1,0 +1,13 @@
+{
+  "name": "shopify-clone",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev:backend": "pnpm --filter backend start:dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
