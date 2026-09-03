@@ -32,6 +32,12 @@ npx prisma migrate dev
 npx prisma generate
 ```
 
+Seed the database with sample products:
+
+```bash
+npx prisma db seed
+```
+
 ## Running the app
 
 ```bash
@@ -63,3 +69,4 @@ pnpm test:cov   # coverage
 - Schema: `prisma/schema.prisma`
 - Client is generated to `generated/prisma` (not `node_modules/@prisma/client`) with `moduleFormat = "cjs"`, since this project compiles to CommonJS.
 - After changing `schema.prisma`, run `npx prisma generate` (and `npx prisma migrate dev` if the change affects the database schema).
+- Seed data lives in `prisma/seed.ts` (run via `npx prisma db seed`, configured in `prisma.config.ts` to use `tsx`). It's idempotent — re-running it updates stock on existing products by name instead of duplicating them.
