@@ -55,6 +55,19 @@ The server listens on `PORT` from `.env` (defaults to 3000 if unset). With the d
 ## Endpoints
 
 - `GET /products` — list all products
+- `POST /products` — create a product
+
+  ```jsonc
+  // request body
+  {
+    "name": "Wool Sweater", // required, non-empty after trimming, max 255 chars
+    "stock": 15             // optional integer >= 0, defaults to 0
+  }
+  ```
+
+  Validation is handled by a global `ValidationPipe` (see `src/main.ts`) with
+  `whitelist` + `forbidNonWhitelisted`, so unknown properties are rejected with a
+  `400` rather than silently ignored.
 
 ## Tests
 
