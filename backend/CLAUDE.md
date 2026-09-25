@@ -9,6 +9,20 @@ NestJS + Prisma API. Part of a pnpm workspace (see `../pnpm-workspace.yaml`); al
 - Prisma 7 removed automatic `datasource.url` reading from `schema.prisma`. The connection URL lives in `prisma.config.ts` (used by the Prisma CLI) and is passed explicitly to `PrismaClient` via a driver adapter (`@prisma/adapter-pg` + `pg`) in `src/prisma/prisma.service.ts`.
 - Nest does **not** load `.env` automatically. `src/main.ts` imports `dotenv/config` at the top for that reason — don't remove it, and don't assume `@nestjs/config` is in use (it isn't).
 
+## Port — the API is on 3001, not 3000
+
+`src/main.ts` listens on `process.env.PORT ?? 3000`, and `.env` sets `PORT=3001`.
+Port 3000 is the Next.js frontend. Always use `http://localhost:3001` for the API:
+
+```bash
+curl http://localhost:3001/products
+```
+
+Sending an API request to port 3000 does not fail loudly — Next.js serves a page
+for any path, so you get `HTTP 200` and an HTML document where you expected JSON.
+If a request to a known-good endpoint returns HTML, or a `POST` returns `200`
+instead of Nest's `201`, you're talking to the frontend, not the API.
+
 ## Structure
 
 - `src/prisma/` — `PrismaModule` (global) + `PrismaService` (extends the generated `PrismaClient`, connects/disconnects on module lifecycle hooks).

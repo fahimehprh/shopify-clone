@@ -11,11 +11,11 @@ datasource db {
 enum BasketStatus {
   PENDING
   EXPIRED
+  CHECKED_OUT
 }
 
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
   name      String
   baskets   Basket[]
 }

@@ -17,7 +17,17 @@ const products = [
   { name: 'Sunglasses', stock: 25 },
 ];
 
+const sampleUserName = 'Sample Shopper';
+
 async function main() {
+  let user = await prisma.user.findFirst({ where: { name: sampleUserName } });
+
+  if (!user) {
+    user = await prisma.user.create({ data: { name: sampleUserName } });
+  }
+
+  console.log(`Sample user: ${user.id} (${user.name})`);
+
   for (const product of products) {
     const existing = await prisma.product.findFirst({
       where: { name: product.name },
