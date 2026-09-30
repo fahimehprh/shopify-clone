@@ -1,36 +1,41 @@
-import { Controller, Post, Param, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
 import { BasketService } from './basket.service';
 import { AddBasketItemDto } from './dto/add-basket-item.dto';
 import { UpdateBasketItemDto } from './dto/update-basket-item.dto';
 import { RemoveBasketItemDto } from './dto/remove-basket-item.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('basket')
 export class BasketController {
     constructor(private readonly basketService: BasketService) {}
 
-    @Get(':userId')
-    findByUser(@Param('userId') userId: string) {
-        return this.basketService.findByUser(userId);
+    @UseGuards(AuthGuard('jwt'))
+    @Get()
+    findByUser(@Req() req) {
+        return this.basketService.findByUser(req.user.id);
+    }
+    
+    @UseGuards(AuthGuard('jwt'))
+    @Post('add-item')
+    addItem(@Req () req, @Body() addBasketItemDto: AddBasketItemDto) {
+        return this.basketService.addItem(req.user.id, addBasketItemDto);
     }
 
-    @Post(':userId/add-item')
-    addItem(@Param('userId') userId: string, @Body() addBasketItemDto: AddBasketItemDto) {
-        return this.basketService.addItem(userId, addBasketItemDto);
-    }
-
-    @Post(':userId/update-item')
+    @UseGuards(AuthGuard('jwt'))
+    @Post('update-item')
     updateItem(
-        @Param('userId') userId: string,
+        @Req() req,
         @Body() updateBasketItemDto: UpdateBasketItemDto
     ) {
-        return this.basketService.updateItem(userId, updateBasketItemDto);
+        return this.basketService.updateItem(req.user.id, updateBasketItemDto);
     }
 
-    @Post(':userId/remove-item')
+    @UseGuards(AuthGuard('jwt'))
+    @Post('remove-item')
     removeItem(
-        @Param('userId') userId: string,
+        @Req() req,
         @Body() removeBasketItemDto: RemoveBasketItemDto
     ) {
-        return this.basketService.removeItem(userId, removeBasketItemDto);
+        return this.basketService.removeItem(req.user.id, removeBasketItemDto);
     }
 }

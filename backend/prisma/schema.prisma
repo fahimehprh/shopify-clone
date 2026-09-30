@@ -18,6 +18,7 @@ model User {
   id        String   @id @default(uuid())
   name      String
   baskets   Basket[]
+  password  String
 }
 
 model Product {

@@ -7,4 +7,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MaxLength(255)
   name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  password: string;
 }

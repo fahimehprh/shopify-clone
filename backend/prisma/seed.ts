@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client';
 
@@ -18,12 +19,14 @@ const products = [
 ];
 
 const sampleUserName = 'Sample Shopper';
+const sampleUserPassword = 'password123';
 
 async function main() {
   let user = await prisma.user.findFirst({ where: { name: sampleUserName } });
 
   if (!user) {
-    user = await prisma.user.create({ data: { name: sampleUserName } });
+    const password = await bcrypt.hash(sampleUserPassword, 10);
+    user = await prisma.user.create({ data: { name: sampleUserName, password } });
   }
 
   console.log(`Sample user: ${user.id} (${user.name})`);

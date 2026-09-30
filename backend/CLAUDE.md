@@ -27,6 +27,13 @@ instead of Nest's `201`, you're talking to the frontend, not the API.
 
 - `src/prisma/` — `PrismaModule` (global) + `PrismaService` (extends the generated `PrismaClient`, connects/disconnects on module lifecycle hooks).
 - `src/products/` — `ProductsModule` / `ProductsController` / `ProductsService`, the reference pattern for feature modules here (controller → service → `PrismaService`).
+- `src/users/`, `src/basket/` — same controller/service/`PrismaService` pattern, plus `class-validator`/`class-transformer` DTOs enforced by the global `ValidationPipe` in `src/main.ts`.
+- `src/auth/` — `AuthModule` (JWT auth via `passport-jwt` + `passport-local`, `bcrypt` for password hashing):
+  - `auth.controller.ts` — `POST /auth/login`, guarded by `AuthGuard('local')`.
+  - `strategies/local.strategies.ts` — validates `userId` + `password` against `UsersService`.
+  - `strategies/jwt.strategy.ts` — validates the bearer token; reads `JWT_SECRET` from `process.env` directly (no `ConfigService` — see below) and throws at construction if it's unset.
+  - `config/jwt.config.ts` — a plain factory (`(): JwtModuleOptions => ({...})`) consumed directly, e.g. `JwtModule.register(jwtConfig())` in `auth.module.ts`. **Do not** reintroduce `@nestjs/config` (`registerAs`, `ConfigModule`) here — it isn't a dependency of this project and has been removed from this file twice already; it breaks the build immediately.
+  - To protect a route elsewhere, add `@UseGuards(AuthGuard('jwt'))` and read the caller's id off `req.user.id` (set by `JwtStrategy.validate`) — never from a route param, to avoid one user reading/mutating another's data. `src/basket/basket.controller.ts` is the reference example.
 - `prisma/schema.prisma` — models: `User`, `Product`, `Basket`, `BasketItem`. `Basket` belongs to `User`; `BasketItem` is the join model between `Basket` and `Product`.
 
 ## Local dev database
@@ -35,4 +42,4 @@ Whatever Postgres instance `DATABASE_URL` in `.env` points to must actually have
 
 ## Adding a new endpoint
 
-Follow the `products` module as the template: a `*.module.ts`/`*.controller.ts`/`*.service.ts` triplet, inject `PrismaService` into the service, register the module in `app.module.ts`. No repository layer or DTO validation library is set up yet — match existing simplicity unless the task calls for more.
+Follow the `products` module as the template: a `*.module.ts`/`*.controller.ts`/`*.service.ts` triplet, inject `PrismaService` into the service, register the module in `app.module.ts`. No repository layer is set up — match existing simplicity unless the task calls for more. Use `class-validator`/`class-transformer` DTOs for request bodies (see `src/basket/dto/` or `src/users/dto/`) — the global `ValidationPipe` enforces them. If the endpoint should only be usable by the logged-in caller, guard it with `AuthGuard('jwt')` (see `src/auth/` above).
